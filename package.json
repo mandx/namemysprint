@@ -1,0 +1,26 @@
+{
+  "name": "howshouldinamemysprint",
+  "version": "0.0.1",
+  "private": true,
+  "devDependencies": {
+    "react-scripts": "0.2.1"
+  },
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "lodash": "^4.15.0",
+    "react": "^15.2.1",
+    "react-bootstrap": "^0.30.2",
+    "react-dom": "^15.2.1",
+    "react-select": "^1.0.0-",
+    "urijs": "^1.18.1",
+    "whatwg-fetch": "^1.0.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "./node_modules/react-scripts/config/eslint.js"
+  }
+}
