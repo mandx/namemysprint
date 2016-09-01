@@ -46,7 +46,7 @@ class App extends Component {
   componentDidMount() {
     this.setState({ loading: true, });
 
-    fetch('/models.json')
+    fetch('models.json')
       .then(checkStatus, (error) => { this.setState({ error, loading: false, }); return {}; })
       .then((data) => {
         const modelsByInitial = {};
