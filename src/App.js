@@ -3,7 +3,8 @@ import './App.css';
 import 'react-select/dist/react-select.css';
 import 'bootstrap/dist/css/bootstrap.css';
 
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import { findDOMNode } from 'react-dom'
 import { Grid, Col, Row, ButtonGroup, Button, Media, Glyphicon } from 'react-bootstrap';
 import Select from 'react-select';
 import _keys from 'lodash/keys';
@@ -15,6 +16,7 @@ import _trim from 'lodash/trim';
 import _bind from 'lodash/bind';
 import _uniq from 'lodash/uniq';
 import _filter from 'lodash/filter';
+import classnames from 'classnames';
 
 import naturalSortCmp from './natural-sort-cmp';
 import { checkStatus } from './fetch-utilities';
@@ -66,7 +68,6 @@ class App extends Component {
           });
         });
         _each(modelsByInitial, function (models, initial) {
-          // modelsByInitial[initial] = _sortBy(models, 'model');
           modelsByInitial[initial] = models.sort(function (a, b) {
             return naturalSortCmp(a.model, b.model);
           });
@@ -82,9 +83,14 @@ class App extends Component {
   }
 
   handleOnChangeInitial(selectedInitial) {
+    if (this.state.selectedInitial === selectedInitial) {
+      return;
+    }
+
     this.setState({
       selectedInitial,
       selectedMake: undefined,
+      selectedModel: undefined,
       makeOptions: _map(
         _uniq(
           _map(
@@ -104,8 +110,18 @@ class App extends Component {
     });
   }
 
-  handleOnModelClick(selectedModel) {
-    this.setState({ selectedModel, });
+  handleOnModelClick(selectedModel, event) {
+    const
+      element = event.currentTarget,
+      { top: elementTop } = element.getBoundingClientRect(),
+      listElement = findDOMNode(this.refs.modelListContainer),
+      { top: listTop } = listElement.getBoundingClientRect(),
+      { marginTop: listTopOffset } = getComputedStyle(listElement);
+
+    this.setState({
+      selectedModel,
+      lastOffsetHeight: elementTop - listTop + parseInt(listTopOffset, 10),
+    });
   }
 
   renderLetterButton(letter) {
@@ -114,10 +130,10 @@ class App extends Component {
 
   renderModelRow(model) {
     const { selectedModel } = this.state,
-      isSelected = !!selectedModel && selectedModel.model == model.model;
+      isSelected = !!selectedModel && selectedModel.model === model.model;
 
     return (
-      <Media className={isSelected ? 'active' : undefined} key={model.make+model.model} onClick={_bind(this.handleOnModelClick, this, model)}>
+      <Media className={classnames('model', {'active': isSelected})} key={model.make+model.model} onClick={_bind(this.handleOnModelClick, this, model)}>
         <Media.Left>
           <Glyphicon glyph="picture"/>
         </Media.Left>
@@ -136,11 +152,11 @@ class App extends Component {
   }
 
   render() {
-    const { loading, error, selectedInitial, models, makeOptions, selectedMake, selectedModel } = this.state;
+    const { loading, error, selectedInitial, models, makeOptions, selectedMake, selectedModel, lastOffsetHeight } = this.state;
     let modelList = models[selectedInitial];
 
     if (selectedMake) {
-      modelList = _filter(modelList, function (model) { return model.make == selectedMake.value; });
+      modelList = _filter(modelList, function (model) { return model.make === selectedMake.value; });
     }
 
     return (
@@ -148,14 +164,28 @@ class App extends Component {
         <Row>
           <Col md={12}>
             <h1>Name My Sprint!</h1>
-            <p className="help-text">
-              Pick a letter and you'll get a list of cars whose model names
-              start with that letter. Click on a model and you'll get a small
-              description from Wikipedia and some images from Google.
-            </p>
-            <ButtonGroup>
-              {_map(_keys(models).sort(), this.renderLetterButton)}
-            </ButtonGroup>
+
+            {!!loading &&
+              <p className="help-text loading">Loading...</p>
+            }
+
+            {!!error &&
+              <p className="help-text error">Error loading data {error}</p>
+            }
+
+            {!loading &&
+              <p className="help-text">
+                Pick a letter and you'll get a list of cars whose model names
+                start with that letter. Click on a model and you'll get a small
+                description from Wikipedia and some images from Google.
+              </p>
+            }
+
+            {!loading &&
+              <ButtonGroup>
+                {_map(_keys(models).sort(), this.renderLetterButton)}
+              </ButtonGroup>
+            }
           </Col>
         </Row>
         <Row>
@@ -170,12 +200,10 @@ class App extends Component {
           </Col>
         </Row>
         <Row>
-          <Col xs={6}>
+          <Col xs={6} className="model-list" ref="modelListContainer">
             {!!selectedInitial && _map(modelList, this.renderModelRow)}
           </Col>
-          <Col xs={6}>
-            {!!selectedModel && <ModelImages query={selectedModel.make + ' ' + selectedModel.model} />}
-          </Col>
+          {!!selectedModel && <ModelImages query={selectedModel.make + ' ' + selectedModel.model} offsetY={lastOffsetHeight} className="col-xs-6"/>}
         </Row>
       </Grid>
     );

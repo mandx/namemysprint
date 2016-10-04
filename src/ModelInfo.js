@@ -1,4 +1,6 @@
 import React, { Component, PropTypes } from 'react';
+import classnames from 'classnames';
+
 import fetchWikiData from './wiki-data';
 
 
@@ -33,10 +35,15 @@ class ModelInfo extends Component {
   }
 
   render() {
-    const { info } = this.state;
+    const
+      { info } = this.state;
 
     return (
-      info.extract ? <blockquote>{info.extract}</blockquote> : <span/>
+      info.extract
+        ? <blockquote className={classnames('model-info-summary', this.props.className)}>
+            {info.extract}
+          </blockquote>
+        : <span/>
     );
   }
 }

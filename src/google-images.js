@@ -28,14 +28,19 @@ export default function searchGoogleImages(query) {
   return fetch(url)
     .then(checkStatus)
     .then(function (responseData) {
-      return _map(responseData.items, function (item) {
-        return {
-          title: item.title,
-          href: item.image.contextLink,
-          src: item.image.thumbnailLink,
-          height: item.image.thumbnailHeight,
-          width: item.image.thumbnailWidth,
-        };
-      });
+      const results = _map(
+        responseData.items,
+        function (item) {
+          return {
+            title: item.title,
+            href: item.image.contextLink,
+            src: item.image.thumbnailLink,
+            height: item.image.thumbnailHeight,
+            width: item.image.thumbnailWidth,
+          };
+        });
+
+      CACHE[url] = results;
+      return results;
     });
 }

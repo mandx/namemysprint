@@ -28,7 +28,8 @@ export default function fetchWikiData(make, model) {
     const
       { pages } = data.query,
       result = pages[_keys(pages)[0]];
-      CACHE[url] = result;
-      return result;
+
+    CACHE[url] = result;
+    return result;
   });
 }

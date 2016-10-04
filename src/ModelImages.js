@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import _map from 'lodash/map';
 import _bindAll from 'lodash/bindAll';
+import classnames from 'classnames';
 import { Thumbnail } from 'react-bootstrap';
 
 import searchGoogleImages from './google-images';
@@ -8,6 +9,7 @@ import searchGoogleImages from './google-images';
 
 class ModelImages extends Component {
   static propTypes = {
+    offsetY: PropTypes.number,
     query: PropTypes.string.isRequired,
   };
 
@@ -59,10 +61,11 @@ class ModelImages extends Component {
 
   render() {
     const
-      { currentQuery, results } = this.state;
+      { results } = this.state,
+      offsetY = parseInt(this.props.offsetY, 10) || 0;
 
     return (
-      <div className="image-search-results">
+      <div style={{marginTop: offsetY}} className={classnames('image-search-results', this.props.className)}>
         {_map(results, this.renderResult)}
       </div>
     );
